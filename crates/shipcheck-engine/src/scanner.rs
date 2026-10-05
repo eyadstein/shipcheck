@@ -13,7 +13,7 @@ const MAX_FILE_BYTES: u64 = 1_000_000;
 #[must_use]
 pub fn scan(root: &Path, catalog: &Catalog) -> Vec<Finding> {
     let files = collect_files(root);
-    let mut findings = Vec::new();
+    let mut findings = scan_taint(root, &files);
     for compiled in catalog.rules() {
         match &compiled.rule.matcher {
             Matcher::LineRegex { .. } => scan_lines(root, &files, compiled, &mut findings),
@@ -68,6 +68,20 @@ fn scan_requires(root: &Path, files: &[PathBuf], compiled: &Compiled, out: &mut 
     }
 }
 
+/// Runs syntax-tree taint analysis on every supported source file.
+fn scan_taint(root: &Path, files: &[PathBuf]) -> Vec<Finding> {
+    let mut out = Vec::new();
+    for path in files {
+        let Some(lang) = shipcheck_taint::Lang::from_path(path) else {
+            continue;
+        };
+        let Some(text) = read_text(path) else {
+            continue;
+        };
+        out.extend(shipcheck_taint::analyze(lang, &text, &relative(root, path)));
+    }
+    out
+}
 fn line_number(index: usize) -> u32 {
     u32::try_from(index + 1).unwrap_or(u32::MAX)
 }

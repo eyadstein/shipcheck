@@ -1,0 +1,16 @@
+[package]
+name = "shipcheck-taint"
+description = "Syntax-tree taint analysis for Shipcheck security rules"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+shipcheck-core = { path = "../shipcheck-core" }
+tree-sitter = "0.24"
+tree-sitter-javascript = "0.23"
+tree-sitter-python = "0.23"
+tree-sitter-typescript = "0.23"
+
+[lints]
+workspace = true
