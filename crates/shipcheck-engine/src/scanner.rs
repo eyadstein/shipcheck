@@ -22,27 +22,54 @@ pub fn scan(root: &Path, catalog: &Catalog) -> Vec<Finding> {
                     findings.push(finding(compiled, "(project)", 0));
                 }
             }
+            Matcher::RequiresPattern { .. } => {
+                scan_requires(root, &files, compiled, &mut findings);
+            }
         }
     }
     findings
 }
 
 fn scan_lines(root: &Path, files: &[PathBuf], compiled: &Compiled, out: &mut Vec<Finding>) {
-    let Some(regex) = &compiled.regex else {
-        return;
-    };
     for path in files.iter().filter(|p| compiled.rule.applies_to(p)) {
         let Some(text) = read_text(path) else {
             continue;
         };
         let file = relative(root, path);
         for (index, line) in text.lines().enumerate() {
-            if regex.is_match(line) {
-                let number = u32::try_from(index + 1).unwrap_or(u32::MAX);
-                out.push(finding(compiled, &file, number));
+            if compiled.flags_line(line) {
+                out.push(finding(compiled, &file, line_number(index)));
             }
         }
     }
+}
+
+fn scan_requires(root: &Path, files: &[PathBuf], compiled: &Compiled, out: &mut Vec<Finding>) {
+    let (Some(when), Some(expect)) = (&compiled.regex, &compiled.expect) else {
+        return;
+    };
+    let mut trigger: Option<(String, u32)> = None;
+    for path in files.iter().filter(|p| compiled.rule.applies_to(p)) {
+        let Some(text) = read_text(path) else {
+            continue;
+        };
+        if expect.is_match(&text) {
+            return;
+        }
+        if trigger.is_none() {
+            trigger = text
+                .lines()
+                .position(|line| when.is_match(line))
+                .map(|index| (relative(root, path), line_number(index)));
+        }
+    }
+    if let Some((file, line)) = trigger {
+        out.push(finding(compiled, &file, line));
+    }
+}
+
+fn line_number(index: usize) -> u32 {
+    u32::try_from(index + 1).unwrap_or(u32::MAX)
 }
 
 fn has_any_file(files: &[PathBuf], names: &[String]) -> bool {
@@ -100,6 +127,15 @@ mod tests {
   match:
     kind: missing_file
     any_of: [PRIVACY.md]
+- id: TEST-REQ
+  category: legal
+  severity: medium
+  message: Emails sent without an unsubscribe link
+  extensions: [js]
+  match:
+    kind: requires_pattern
+    when: '(?i)nodemailer'
+    expect: '(?i)unsubscribe'
 ";
 
     fn project(files: &[(&str, &str)]) -> tempfile::TempDir {
@@ -139,6 +175,31 @@ mod tests {
     #[test]
     fn skips_files_with_other_extensions() {
         let dir = project(&[("notes.txt", "eval(x)\n"), ("PRIVACY.md", "policy")]);
+        assert_eq!(run(&dir), Vec::<Finding>::new());
+    }
+
+    #[test]
+    fn requires_pattern_flags_trigger_without_expected_text() {
+        let dir = project(&[
+            ("mail.js", "const m = require('nodemailer');\n"),
+            ("PRIVACY.md", "policy"),
+        ]);
+        let found = run(&dir);
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].rule_id, "TEST-REQ");
+        assert_eq!(found[0].file, "mail.js");
+        assert_eq!(found[0].line, 1);
+    }
+
+    #[test]
+    fn requires_pattern_passes_when_expected_text_exists() {
+        let dir = project(&[
+            (
+                "mail.js",
+                "require('nodemailer'); // unsubscribe link added\n",
+            ),
+            ("PRIVACY.md", "policy"),
+        ]);
         assert_eq!(run(&dir), Vec::<Finding>::new());
     }
 }

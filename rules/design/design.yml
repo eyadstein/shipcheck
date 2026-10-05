@@ -7,6 +7,12 @@
   match:
     kind: line_regex
     pattern: '(?i)linear-gradient\([^)]*(purple|violet|indigo)[^)]*(blue|cyan)|from-(purple|violet|indigo)-\d+.*to-(blue|cyan)-\d+'
+  examples:
+    flag:
+      - 'background: linear-gradient(135deg, purple, blue);'
+      - '<div class="bg-gradient-to-r from-purple-500 to-blue-500">'
+    pass:
+      - 'background: linear-gradient(90deg, #111, #222);'
 
 - id: DES-002
   category: design
@@ -17,6 +23,11 @@
   match:
     kind: line_regex
     pattern: '(?i)font-family:[^;]*\binter\b'
+  examples:
+    flag:
+      - 'font-family: Inter, sans-serif;'
+    pass:
+      - 'font-family: Georgia, serif;'
 
 - id: DES-003
   category: design
@@ -27,3 +38,8 @@
   match:
     kind: line_regex
     pattern: '<h[1-3][^>]*>[^<]*\p{Emoji_Presentation}'
+  examples:
+    flag:
+      - "<h1>\U0001F680 Launch faster</h1>"
+    pass:
+      - '<h1>Launch faster</h1>'

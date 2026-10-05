@@ -7,6 +7,13 @@
   match:
     kind: line_regex
     pattern: '\beval\s*\('
+  examples:
+    flag:
+      - 'eval(userInput);'
+      - 'const x = eval (code);'
+    pass:
+      - 'const r = retrieval(x);'
+      - 'evaluate(x);'
 
 - id: SEC-002
   category: security
@@ -17,6 +24,11 @@
   match:
     kind: line_regex
     pattern: '(?i)\b(select|insert|update|delete)\b.+\$\{'
+  examples:
+    flag:
+      - 'const q = `SELECT * FROM users WHERE id = ${id}`;'
+    pass:
+      - "db.query('SELECT * FROM users WHERE id = ?', [id]);"
 
 - id: SEC-003
   category: security
@@ -27,6 +39,12 @@
   match:
     kind: line_regex
     pattern: 'os\.system\(|subprocess\.\w+\(.*shell\s*=\s*True'
+  examples:
+    flag:
+      - 'os.system("rm " + name)'
+      - 'subprocess.run(cmd, shell=True)'
+    pass:
+      - 'subprocess.run(["ls", "-l"])'
 
 - id: SEC-004
   category: security
@@ -37,3 +55,8 @@
   match:
     kind: line_regex
     pattern: '\.innerHTML\s*='
+  examples:
+    flag:
+      - 'el.innerHTML = userInput;'
+    pass:
+      - 'el.textContent = userInput;'

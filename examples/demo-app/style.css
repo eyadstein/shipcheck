@@ -2,3 +2,7 @@ body {
   font-family: Inter, sans-serif;
   background: linear-gradient(135deg, purple, blue);
 }
+
+button:focus {
+  outline: none;
+}

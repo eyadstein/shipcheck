@@ -25,3 +25,201 @@
   match:
     kind: line_regex
     pattern: '(?i)google-analytics\.com|googletagmanager\.com'
+  examples:
+    flag:
+      - '<script src="https://www.googletagmanager.com/gtag/js"></script>'
+    pass:
+      - '<script src="/static/app.js"></script>'
+
+- id: LEGAL-004
+  category: legal
+  severity: medium
+  message: Payments are used but no refund policy is mentioned anywhere.
+  fix: Publish a refund policy and link it at checkout.
+  extensions: [html, js, ts, jsx, tsx, py, md]
+  match:
+    kind: requires_pattern
+    when: '(?i)\b(stripe|paypal|paddle|lemonsqueezy)\b'
+    expect: '(?i)\brefunds?\b'
+  examples:
+    flag:
+      - 'import Stripe from "stripe";'
+    pass:
+      - 'const total = price * quantity;'
+
+- id: LEGAL-005
+  category: legal
+  severity: high
+  message: Cookies are set but no cookie consent mechanism was found.
+  fix: Add a consent banner or a consent library and block non-essential cookies until the user agrees.
+  extensions: [html, js, ts, jsx, tsx]
+  match:
+    kind: requires_pattern
+    when: '(?i)document\.cookie|\bset-cookie\b|js-cookie|react-cookie'
+    expect: '(?i)cookie[-_ ]?(consent|banner|notice|preferences)|cookiebot|onetrust|osano|termly|klaro'
+  examples:
+    flag:
+      - 'document.cookie = "theme=dark";'
+      - 'import Cookies from "js-cookie";'
+    pass:
+      - 'const cookieJar = [];'
+
+- id: LEGAL-006
+  category: legal
+  severity: medium
+  message: Email sending found but no unsubscribe link anywhere. Marketing email needs one.
+  fix: Add an unsubscribe link and a List-Unsubscribe header to every marketing email.
+  extensions: [js, ts, py, html, txt, hbs]
+  match:
+    kind: requires_pattern
+    when: '(?i)nodemailer|sendgrid|mailgun|mailchimp|smtplib|postmark'
+    expect: '(?i)unsubscribe'
+  examples:
+    flag:
+      - 'const transporter = nodemailer.createTransport(options);'
+    pass:
+      - 'await sendVerificationCode(user);'
+
+- id: LEGAL-007
+  category: legal
+  severity: medium
+  message: Email field found but no consent checkbox or privacy link anywhere.
+  fix: Add a consent checkbox or a short notice linking to your privacy policy next to the form.
+  extensions: [html, jsx, tsx]
+  match:
+    kind: requires_pattern
+    when: '(?i)<input[^>]*type=[\x27"]?email'
+    expect: '(?i)type=[\x27"]?checkbox|consent|privacy'
+  examples:
+    flag:
+      - '<input type="email" name="email">'
+    pass:
+      - '<input type="text" name="name">'
+
+- id: LEGAL-008
+  category: legal
+  severity: medium
+  message: Absolute marketing claim that is hard to prove.
+  fix: Replace absolute claims with specific, provable statements and cite the source.
+  extensions: [html, jsx, tsx, md]
+  match:
+    kind: line_regex
+    pattern: '(?i)(guaranteed results|100% secure|unhackable|#1 rated|best in the world|risk[- ]free|clinically proven)'
+  examples:
+    flag:
+      - '<p>100% secure and risk-free.</p>'
+      - '<h2>Guaranteed results in 7 days</h2>'
+    pass:
+      - '<p>We encrypt data at rest and in transit.</p>'
+
+- id: LEGAL-009
+  category: legal
+  severity: medium
+  message: False urgency pattern (fake scarcity or countdown).
+  fix: Only show scarcity or deadlines that are real and verifiable.
+  extensions: [html, jsx, tsx, js]
+  match:
+    kind: line_regex
+    pattern: '(?i)only \d+ (left|remaining|spots)|offer ends in|countdown-timer'
+  examples:
+    flag:
+      - '<span>Only 3 left in stock!</span>'
+      - '<div class="countdown-timer">'
+    pass:
+      - '<span>In stock</span>'
+
+- id: LEGAL-010
+  category: legal
+  severity: medium
+  message: Consent checkbox is pre-checked. Consent must be an active opt-in.
+  fix: Remove the checked attribute so the user has to tick the box.
+  extensions: [html, jsx, tsx]
+  match:
+    kind: line_regex
+    pattern: '(?i)<input[^>]*type=[\x27"]?checkbox[^>]*\bchecked\b'
+  examples:
+    flag:
+      - '<input type="checkbox" name="marketing" checked>'
+    pass:
+      - '<input type="checkbox" name="marketing">'
+
+- id: LEGAL-011
+  category: legal
+  severity: medium
+  message: Image without alt text (accessibility, WCAG 1.1.1). Multi-line tags can be false positives.
+  fix: Add a short descriptive alt attribute, or alt="" for purely decorative images.
+  extensions: [html, jsx, tsx]
+  match:
+    kind: line_regex
+    pattern: '(?i)<img\b'
+    unless: '(?i)\balt\s*='
+  examples:
+    flag:
+      - '<img src="logo.png">'
+    pass:
+      - '<img src="logo.png" alt="Company logo">'
+
+- id: LEGAL-012
+  category: legal
+  severity: medium
+  message: Focus outline removed. Keyboard users lose track of where they are (WCAG 2.4.7).
+  fix: Keep the outline or replace it with a clearly visible focus style.
+  extensions: [css, scss, html]
+  match:
+    kind: line_regex
+    pattern: '(?i)outline\s*:\s*(none|0(px)?)\s*(;|\}|!important)'
+  examples:
+    flag:
+      - 'button:focus { outline: none; }'
+      - 'a:focus{outline:0}'
+    pass:
+      - 'button:focus-visible { outline: 2px solid #1a73e8; }'
+
+- id: LEGAL-013
+  category: legal
+  severity: medium
+  message: Users can sign up but no account or data deletion flow was found.
+  fix: Add a way for users to delete their account and data, and document the process in your privacy policy.
+  extensions: [js, ts, jsx, tsx, py, rb, php, html]
+  match:
+    kind: requires_pattern
+    when: '(?i)\b(signup|sign_up|register|createUser|create_user)\b'
+    expect: '(?i)delete[-_ ]?(my[-_ ]?)?(account|user|data)|erase[-_ ]?(account|user|data)|data[-_ ]deletion|gdpr'
+  examples:
+    flag:
+      - 'app.post("/signup", handler);'
+      - 'def create_user(data):'
+    pass:
+      - 'app.get("/health", handler);'
+
+- id: LEGAL-014
+  category: legal
+  severity: low
+  message: Date of birth is collected but no age or parental consent handling was found.
+  fix: Add an age gate and handle parental consent where children could use the service (COPPA, GDPR-K).
+  extensions: [js, ts, jsx, tsx, py, html]
+  match:
+    kind: requires_pattern
+    when: '(?i)date[-_ ]?of[-_ ]?birth|\bdob\b|\bbirthdate\b'
+    expect: '(?i)parental|guardian|coppa|under[- ]?1[368]|age[-_ ]?(gate|check|verification|consent)'
+  examples:
+    flag:
+      - '<input name="date_of_birth">'
+      - 'user.dob = form.dob'
+    pass:
+      - '<input name="full_name">'
+
+- id: LEGAL-015
+  category: legal
+  severity: medium
+  message: Third-party tracker found. Disclose it in your privacy policy and load it only after consent.
+  fix: Gate the script behind consent and list the vendor in your privacy policy.
+  extensions: [html, js, ts, jsx, tsx]
+  match:
+    kind: line_regex
+    pattern: '(?i)connect\.facebook\.net|fbevents\.js|hotjar\.com|static\.ads-twitter\.com|snap\.licdn\.com|doubleclick\.net'
+  examples:
+    flag:
+      - '<script src="https://connect.facebook.net/en_US/fbevents.js"></script>'
+    pass:
+      - '<script src="/app.js"></script>'

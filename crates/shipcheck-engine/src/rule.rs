@@ -12,10 +12,27 @@ use crate::walk::collect_files;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Matcher {
-    /// Flag every line that matches a regular expression.
-    LineRegex { pattern: String },
+    /// Flag every line that matches `pattern`, unless it also matches `unless`.
+    LineRegex {
+        pattern: String,
+        #[serde(default)]
+        unless: Option<String>,
+    },
     /// Flag the project when none of the listed file names exist.
     MissingFile { any_of: Vec<String> },
+    /// Flag the project when `when` matches somewhere but `expect` matches nowhere.
+    RequiresPattern { when: String, expect: String },
+}
+
+/// Sample lines that document and test a rule.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct Examples {
+    /// Lines the rule must flag.
+    #[serde(default)]
+    pub flag: Vec<String>,
+    /// Lines the rule must leave alone.
+    #[serde(default)]
+    pub pass: Vec<String>,
 }
 
 /// One rule as written in a YAML rule file.
@@ -32,6 +49,8 @@ pub struct Rule {
     pub extensions: Vec<String>,
     #[serde(rename = "match")]
     pub matcher: Matcher,
+    #[serde(default)]
+    pub examples: Examples,
 }
 
 impl Rule {
@@ -47,27 +66,80 @@ impl Rule {
     }
 }
 
-/// A rule paired with its compiled pattern.
+/// A rule paired with its compiled patterns.
 #[derive(Debug)]
 pub struct Compiled {
     pub rule: Rule,
+    /// Main pattern: `pattern` for `line_regex`, `when` for `requires_pattern`.
     pub regex: Option<Regex>,
+    /// The `expect` pattern of a `requires_pattern` rule.
+    pub expect: Option<Regex>,
+    /// The `unless` pattern of a `line_regex` rule.
+    pub unless: Option<Regex>,
 }
 
 impl Compiled {
     fn new(rule: Rule) -> Result<Self> {
-        let regex = match &rule.matcher {
-            Matcher::LineRegex { pattern } => {
-                let compiled = Regex::new(pattern).map_err(|source| Error::Pattern {
-                    id: rule.id.clone(),
-                    source,
-                })?;
-                Some(compiled)
+        let id = rule.id.as_str();
+        let (regex, expect, unless) = match &rule.matcher {
+            Matcher::LineRegex { pattern, unless } => (
+                Some(compile(id, pattern)?),
+                None,
+                unless
+                    .as_deref()
+                    .map(|text| compile(id, text))
+                    .transpose()?,
+            ),
+            Matcher::MissingFile { .. } => (None, None, None),
+            Matcher::RequiresPattern { when, expect } => {
+                (Some(compile(id, when)?), Some(compile(id, expect)?), None)
             }
-            Matcher::MissingFile { .. } => None,
         };
-        Ok(Self { rule, regex })
+        Ok(Self {
+            rule,
+            regex,
+            expect,
+            unless,
+        })
     }
+
+    /// Whether the rule's main pattern fires on a single line.
+    #[must_use]
+    pub fn flags_line(&self, line: &str) -> bool {
+        let Some(regex) = &self.regex else {
+            return false;
+        };
+        regex.is_match(line) && !self.unless.as_ref().is_some_and(|skip| skip.is_match(line))
+    }
+
+    /// Checks the rule's examples against its main pattern.
+    /// Returns one message per example that behaves wrongly.
+    #[must_use]
+    pub fn check_examples(&self) -> Vec<String> {
+        let id = &self.rule.id;
+        let missed = self
+            .rule
+            .examples
+            .flag
+            .iter()
+            .filter(|line| !self.flags_line(line))
+            .map(|line| format!("{id}: should flag {line:?}"));
+        let wrong = self
+            .rule
+            .examples
+            .pass
+            .iter()
+            .filter(|line| self.flags_line(line))
+            .map(|line| format!("{id}: should not flag {line:?}"));
+        missed.chain(wrong).collect()
+    }
+}
+
+fn compile(id: &str, pattern: &str) -> Result<Regex> {
+    Regex::new(pattern).map_err(|source| Error::Pattern {
+        id: id.to_owned(),
+        source,
+    })
 }
 
 /// All rules loaded from disk, with patterns compiled.
@@ -113,6 +185,15 @@ impl Catalog {
     pub fn rules(&self) -> &[Compiled] {
         &self.rules
     }
+
+    /// Runs every rule's examples and returns all failures.
+    #[must_use]
+    pub fn check_examples(&self) -> Vec<String> {
+        self.rules
+            .iter()
+            .flat_map(Compiled::check_examples)
+            .collect()
+    }
 }
 
 fn is_rule_file(path: &Path) -> bool {
@@ -148,5 +229,14 @@ mod tests {
             Catalog::from_yaml(yaml),
             Err(Error::Pattern { .. })
         ));
+    }
+
+    #[test]
+    fn unless_pattern_suppresses_a_match() {
+        let yaml = "- id: A11Y\n  category: legal\n  severity: low\n  message: x\n  match:\n    kind: line_regex\n    pattern: '<img'\n    unless: 'alt='\n";
+        let catalog = Catalog::from_yaml(yaml).unwrap();
+        let compiled = &catalog.rules()[0];
+        assert!(compiled.flags_line("<img src=x>"));
+        assert!(!compiled.flags_line("<img src=x alt=y>"));
     }
 }
