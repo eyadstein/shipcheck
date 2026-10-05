@@ -14,6 +14,7 @@ const MAX_FILE_BYTES: u64 = 1_000_000;
 pub fn scan(root: &Path, catalog: &Catalog) -> Vec<Finding> {
     let files = collect_files(root);
     let mut findings = scan_taint(root, &files);
+    findings.extend(scan_design(root, &files));
     for compiled in catalog.rules() {
         match &compiled.rule.matcher {
             Matcher::LineRegex { .. } => scan_lines(root, &files, compiled, &mut findings),
@@ -81,6 +82,37 @@ fn scan_taint(root: &Path, files: &[PathBuf]) -> Vec<Finding> {
         out.extend(shipcheck_taint::analyze(lang, &text, &relative(root, path)));
     }
     out
+}
+/// Whether a path is generated or vendored output that should not be judged.
+fn is_generated(root: &Path, path: &Path) -> bool {
+    let relative_path = path.strip_prefix(root).unwrap_or(path);
+    let vendored = relative_path.components().any(|part| {
+        matches!(
+            part.as_os_str().to_str(),
+            Some("node_modules" | "dist" | "build" | "vendor" | "target" | ".next")
+        )
+    });
+    let minified = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .is_some_and(|name| name.contains(".min."));
+    vendored || minified
+}
+
+/// Runs the project-level design analysis on every stylesheet and page file.
+fn scan_design(root: &Path, files: &[PathBuf]) -> Vec<Finding> {
+    let sources: Vec<shipcheck_design::SourceFile> = files
+        .iter()
+        .filter(|path| shipcheck_design::is_design_file(path.as_path()))
+        .filter(|path| !is_generated(root, path.as_path()))
+        .filter_map(|path| {
+            Some(shipcheck_design::SourceFile {
+                path: relative(root, path),
+                text: read_text(path)?,
+            })
+        })
+        .collect();
+    shipcheck_design::analyze(&sources)
 }
 fn line_number(index: usize) -> u32 {
     u32::try_from(index + 1).unwrap_or(u32::MAX)

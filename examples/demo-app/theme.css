@@ -1,0 +1,14 @@
+:root {
+  --background: 0 0% 100%;
+  --primary: 222.2 47.4% 11.2%;
+}
+
+.dark {
+  --background: #111111;
+  --foreground: #f5f5f5;
+  --muted-foreground: #5c5c5c;
+}
+
+body { padding: 13px; margin: 7px; }
+.hero { padding: 22px 18px; gap: 10px 14px; margin: 5px; }
+.card { padding: 30px; }

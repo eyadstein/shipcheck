@@ -11,6 +11,7 @@ regex = "1"
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
 shipcheck-core = { path = "../shipcheck-core" }
+shipcheck-design = { path = "../shipcheck-design" }
 shipcheck-taint = { path = "../shipcheck-taint" }
 thiserror = "2"
 

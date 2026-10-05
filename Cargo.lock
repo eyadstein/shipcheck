@@ -458,6 +458,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "shipcheck-design"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "shipcheck-core",
+]
+
+[[package]]
 name = "shipcheck-engine"
 version = "0.1.0"
 dependencies = [
@@ -466,6 +474,7 @@ dependencies = [
  "serde",
  "serde_yaml",
  "shipcheck-core",
+ "shipcheck-design",
  "shipcheck-taint",
  "tempfile",
  "thiserror",

@@ -1,0 +1,13 @@
+[package]
+name = "shipcheck-design"
+description = "Project-level design analysis for Shipcheck"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+regex = "1"
+shipcheck-core = { path = "../shipcheck-core" }
+
+[lints]
+workspace = true
