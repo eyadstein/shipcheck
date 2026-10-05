@@ -1,0 +1,17 @@
+[package]
+name = "shipcheck-cli"
+description = "Command line interface for Shipcheck"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "shipcheck"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+shipcheck-core = { path = "../shipcheck-core" }
+
+[lints]
+workspace = true
