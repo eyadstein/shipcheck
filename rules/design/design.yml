@@ -1,0 +1,29 @@
+- id: DES-001
+  category: design
+  severity: medium
+  message: Purple-to-blue gradient is a common vibecoded tell.
+  fix: Pick a palette tied to your brand and use flat color or a subtle single-hue gradient.
+  extensions: [css, scss, html, jsx, tsx]
+  match:
+    kind: line_regex
+    pattern: '(?i)linear-gradient\([^)]*(purple|violet|indigo)[^)]*(blue|cyan)|from-(purple|violet|indigo)-\d+.*to-(blue|cyan)-\d+'
+
+- id: DES-002
+  category: design
+  severity: low
+  message: Inter used as the font family.
+  fix: Choose a typeface that fits the product, or at least pair Inter with a distinctive heading font.
+  extensions: [css, scss]
+  match:
+    kind: line_regex
+    pattern: '(?i)font-family:[^;]*\binter\b'
+
+- id: DES-003
+  category: design
+  severity: low
+  message: Emoji in a heading.
+  fix: Replace the emoji with a real icon or remove it.
+  extensions: [html, jsx, tsx]
+  match:
+    kind: line_regex
+    pattern: '<h[1-3][^>]*>[^<]*\p{Emoji_Presentation}'

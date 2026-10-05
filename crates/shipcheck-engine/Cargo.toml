@@ -1,0 +1,20 @@
+[package]
+name = "shipcheck-engine"
+description = "Rule loading and project scanning for Shipcheck"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+ignore = "0.4"
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+shipcheck-core = { path = "../shipcheck-core" }
+thiserror = "2"
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true

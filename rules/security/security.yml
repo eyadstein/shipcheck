@@ -1,0 +1,39 @@
+- id: SEC-001
+  category: security
+  severity: high
+  message: eval runs arbitrary code (CWE-95).
+  fix: Remove eval and parse the data explicitly, for example with JSON.parse.
+  extensions: [js, ts, jsx, tsx]
+  match:
+    kind: line_regex
+    pattern: '\beval\s*\('
+
+- id: SEC-002
+  category: security
+  severity: high
+  message: SQL built with string interpolation (CWE-89).
+  fix: Use parameterized queries or a query builder.
+  extensions: [js, ts]
+  match:
+    kind: line_regex
+    pattern: '(?i)\b(select|insert|update|delete)\b.+\$\{'
+
+- id: SEC-003
+  category: security
+  severity: high
+  message: Shell command built from a string (CWE-78).
+  fix: Pass an argument list to subprocess and never use shell=True with user input.
+  extensions: [py]
+  match:
+    kind: line_regex
+    pattern: 'os\.system\(|subprocess\.\w+\(.*shell\s*=\s*True'
+
+- id: SEC-004
+  category: security
+  severity: high
+  message: innerHTML assignment can lead to cross-site scripting (CWE-79).
+  fix: Use textContent, or sanitize the HTML first.
+  extensions: [js, ts, jsx, tsx, html]
+  match:
+    kind: line_regex
+    pattern: '\.innerHTML\s*='

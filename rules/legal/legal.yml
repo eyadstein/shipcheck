@@ -1,0 +1,27 @@
+- id: LEGAL-001
+  category: legal
+  severity: high
+  message: No privacy policy file found.
+  fix: Add a PRIVACY.md or privacy-policy.html and link it from your footer and sign-up form.
+  match:
+    kind: missing_file
+    any_of: [PRIVACY.md, PRIVACY_POLICY.md, privacy-policy.md, privacy.md, privacy.html, privacy-policy.html]
+
+- id: LEGAL-002
+  category: legal
+  severity: medium
+  message: No terms of service file found.
+  fix: Add a TERMS.md or terms-of-service.html and link it from your footer.
+  match:
+    kind: missing_file
+    any_of: [TERMS.md, TERMS_OF_SERVICE.md, terms.md, terms-of-service.md, terms.html, terms-of-service.html]
+
+- id: LEGAL-003
+  category: legal
+  severity: medium
+  message: Analytics script found. Make sure it only loads after cookie consent.
+  fix: Load the script from your consent banner callback instead of on page load.
+  extensions: [html, js, ts, jsx, tsx]
+  match:
+    kind: line_regex
+    pattern: '(?i)google-analytics\.com|googletagmanager\.com'
