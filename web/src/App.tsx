@@ -22,17 +22,20 @@ function renderRoute(route: Route) {
 
 export function App() {
   const route = useRoute();
-  const firstRender = useRef(true);
+  const shownRoute = useRef<string | null>(null);
 
   useEffect(() => {
     document.title = titleFor(route);
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
+    // Compare against the page shown before, so running the effect twice
+    // in development mode never counts as a navigation.
+    const key = JSON.stringify(route);
+    const changed = shownRoute.current !== null && shownRoute.current !== key;
+    shownRoute.current = key;
+    if (changed) {
+      // Move keyboard and screen reader focus to the new page content.
+      document.getElementById("main")?.focus();
+      window.scrollTo(0, 0);
     }
-    // Move keyboard and screen reader focus to the new page content.
-    document.getElementById("main")?.focus();
-    window.scrollTo(0, 0);
   }, [route]);
 
   return <Layout>{renderRoute(route)}</Layout>;
