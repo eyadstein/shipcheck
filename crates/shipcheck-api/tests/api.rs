@@ -191,3 +191,37 @@ async fn unknown_scan_is_not_found() {
     let (status, _) = send(&app, get(&format!("/api/v1/scans/{}", Uuid::new_v4()))).await;
     assert_eq!(status, StatusCode::NOT_FOUND);
 }
+
+async fn preflight(app: &Router, origin: &str) -> Option<String> {
+    let request = Request::builder()
+        .method("OPTIONS")
+        .uri("/api/v1/scans")
+        .header("origin", origin)
+        .header("access-control-request-method", "GET")
+        .body(Body::empty())
+        .expect("request");
+    let response = app.clone().oneshot(request).await.expect("response");
+    response
+        .headers()
+        .get("access-control-allow-origin")
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned)
+}
+
+#[tokio::test]
+async fn listed_origins_may_read_and_others_may_not() {
+    let app = shipcheck_api::with_cors(lazy_app(), &["https://dashboard.example".to_owned()]);
+    assert_eq!(
+        preflight(&app, "https://dashboard.example")
+            .await
+            .as_deref(),
+        Some("https://dashboard.example")
+    );
+    assert_eq!(preflight(&app, "https://evil.example").await, None);
+}
+
+#[tokio::test]
+async fn no_origins_means_no_cors_headers() {
+    let app = shipcheck_api::with_cors(lazy_app(), &[]);
+    assert_eq!(preflight(&app, "https://dashboard.example").await, None);
+}

@@ -6,6 +6,7 @@
 
 mod auth;
 pub mod config;
+mod cors;
 pub mod db;
 pub mod error;
 pub mod model;
@@ -16,6 +17,8 @@ use std::sync::Arc;
 
 use axum::Router;
 use sqlx::PgPool;
+
+pub use cors::with_cors;
 
 /// Shared state handed to every request handler.
 #[derive(Clone)]

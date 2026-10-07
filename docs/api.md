@@ -27,3 +27,10 @@ client is ignored: the server computes it from the findings.
 - Requests over 8 MB and reports over 10000 findings are rejected.
 - Database errors are logged and never returned to clients.
 - Reads are open for now. Put the API behind a login before exposing it publicly.
+
+## Browser access (CORS)
+
+Set `CORS_ORIGINS` to a comma separated list of origins, for example
+`https://dashboard.example,http://localhost:5173`. Those origins may send `GET`
+requests. Writes are never allowed from a browser origin, so the API key stays on
+servers and CI. Entries must be plain origins: no paths, no wildcards.
