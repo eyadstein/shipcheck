@@ -16,9 +16,9 @@ fn lazy_app() -> Router {
     build_router(AppState::new(pool, KEY))
 }
 
-/// A router backed by the real database, or `None` when `DATABASE_URL` is not set.
+/// A router backed by the real database, or `None` when `TEST_DATABASE_URL` is not set.
 async fn db_app() -> Option<Router> {
-    let url = std::env::var("DATABASE_URL").ok()?;
+    let url = std::env::var("TEST_DATABASE_URL").ok()?;
     let pool = db::connect(&url).await.expect("database is reachable");
     db::migrate(&pool).await.expect("migrations apply");
     Some(build_router(AppState::new(pool, KEY)))
@@ -103,7 +103,7 @@ async fn unknown_severities_are_rejected() {
 #[tokio::test]
 async fn health_reports_ok() {
     let Some(app) = db_app().await else {
-        eprintln!("skipping: DATABASE_URL is not set");
+        eprintln!("skipping: TEST_DATABASE_URL is not set");
         return;
     };
     let (status, body) = send(&app, get("/health")).await;
@@ -114,7 +114,7 @@ async fn health_reports_ok() {
 #[tokio::test]
 async fn stored_scan_can_be_fetched_with_server_side_score() {
     let Some(app) = db_app().await else {
-        eprintln!("skipping: DATABASE_URL is not set");
+        eprintln!("skipping: TEST_DATABASE_URL is not set");
         return;
     };
     let project = unique_project();
@@ -141,7 +141,7 @@ async fn stored_scan_can_be_fetched_with_server_side_score() {
 #[tokio::test]
 async fn history_can_be_filtered_and_limited() {
     let Some(app) = db_app().await else {
-        eprintln!("skipping: DATABASE_URL is not set");
+        eprintln!("skipping: TEST_DATABASE_URL is not set");
         return;
     };
     let project = unique_project();
@@ -163,7 +163,7 @@ async fn history_can_be_filtered_and_limited() {
 #[tokio::test]
 async fn projects_show_their_latest_score() {
     let Some(app) = db_app().await else {
-        eprintln!("skipping: DATABASE_URL is not set");
+        eprintln!("skipping: TEST_DATABASE_URL is not set");
         return;
     };
     let project = unique_project();
@@ -185,7 +185,7 @@ async fn projects_show_their_latest_score() {
 #[tokio::test]
 async fn unknown_scan_is_not_found() {
     let Some(app) = db_app().await else {
-        eprintln!("skipping: DATABASE_URL is not set");
+        eprintln!("skipping: TEST_DATABASE_URL is not set");
         return;
     };
     let (status, _) = send(&app, get(&format!("/api/v1/scans/{}", Uuid::new_v4()))).await;

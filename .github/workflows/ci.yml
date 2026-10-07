@@ -22,7 +22,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DATABASE_URL: postgres://shipcheck:shipcheck@localhost:5432/shipcheck
+      TEST_DATABASE_URL: postgres://shipcheck:shipcheck@localhost:5432/shipcheck
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

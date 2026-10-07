@@ -34,3 +34,15 @@ Set `CORS_ORIGINS` to a comma separated list of origins, for example
 `https://dashboard.example,http://localhost:5173`. Those origins may send `GET`
 requests. Writes are never allowed from a browser origin, so the API key stays on
 servers and CI. Entries must be plain origins: no paths, no wildcards.
+
+## Running the tests
+
+The database tests only run when `TEST_DATABASE_URL` is set, so they never write to
+your development data. Locally, create a second database once and point the variable at it:
+
+docker compose exec -T db psql -U shipcheck -d postgres -c "CREATE DATABASE shipcheck_test"
+$env:TEST_DATABASE_URL = "postgres://shipcheck:shipcheck@127.0.0.1:5433/shipcheck_test"
+cargo test -p shipcheck-api
+
+
+CI sets the variable for its own throwaway database.
