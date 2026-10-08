@@ -22,6 +22,7 @@ Every finding has a rule id, a location and a suggested fix. The project gets a 
 | `crates/shipcheck-api` | HTTP API with PostgreSQL storage |
 | `rules/` | YAML rule packs |
 | `web/` | React and TypeScript dashboard |
+| `action/` | GitHub Action that comments on pull requests |
 
 ## Quick start
 
