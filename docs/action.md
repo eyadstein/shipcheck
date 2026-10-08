@@ -55,3 +55,5 @@ no build step and no runtime dependency.
 - File names and rule text are escaped before they go into the comment, so a pull request
   cannot inject markdown, links or mentions through them.
 - The upload failing never fails the job. Only the score threshold does.
+
+This repository's first pull request was opened to try the action.
