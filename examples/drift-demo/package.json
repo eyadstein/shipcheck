@@ -1,0 +1,9 @@
+{
+  "name": "drift-demo",
+  "private": true,
+  "dependencies": {
+    "stripe": "^14.0.0",
+    "@sentry/browser": "^8.0.0",
+    "openai": "^4.0.0"
+  }
+}

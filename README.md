@@ -18,6 +18,7 @@ Every finding has a rule id, a location and a suggested fix. The project gets a 
 | `crates/shipcheck-engine` | Rule loading and the scanner |
 | `crates/shipcheck-taint` | Taint analysis for JavaScript, TypeScript and Python |
 | `crates/shipcheck-design` | Project level design analysis |
+| `crates/shipcheck-ledger` | Compares what the code does with what the privacy policy says |
 | `crates/shipcheck-cli` | The `shipcheck` command |
 | `crates/shipcheck-api` | HTTP API with PostgreSQL storage |
 | `rules/` | YAML rule packs |

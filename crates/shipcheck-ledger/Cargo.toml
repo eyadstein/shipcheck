@@ -1,0 +1,15 @@
+[package]
+name = "shipcheck-ledger"
+description = "Disclosure ledger: compares what a project's code does with what its privacy policy says"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+shipcheck-core = { path = "../shipcheck-core" }
+
+[lints]
+workspace = true
