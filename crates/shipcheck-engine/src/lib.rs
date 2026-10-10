@@ -7,5 +7,5 @@ mod walk;
 
 pub use error::{Error, Result};
 pub use rule::{Catalog, Compiled, Examples, Matcher, Rule};
-pub use scanner::scan;
+pub use scanner::{ledger, scan};
 pub use walk::collect_files;

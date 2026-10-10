@@ -15,6 +15,7 @@ pub fn scan(root: &Path, catalog: &Catalog) -> Vec<Finding> {
     let files = collect_files(root);
     let mut findings = scan_taint(root, &files);
     findings.extend(scan_design(root, &files));
+    findings.extend(scan_ledger(root, &files));
     for compiled in catalog.rules() {
         match &compiled.rule.matcher {
             Matcher::LineRegex { .. } => scan_lines(root, &files, compiled, &mut findings),
@@ -113,6 +114,32 @@ fn scan_design(root: &Path, files: &[PathBuf]) -> Vec<Finding> {
         })
         .collect();
     shipcheck_design::analyze(&sources)
+}
+/// Reads the files the disclosure ledger cares about.
+fn ledger_sources(root: &Path, files: &[PathBuf]) -> Vec<shipcheck_ledger::SourceFile> {
+    files
+        .iter()
+        .filter(|path| shipcheck_ledger::is_ledger_file(path.as_path()))
+        .filter(|path| !is_generated(root, path.as_path()))
+        .filter_map(|path| {
+            Some(shipcheck_ledger::SourceFile {
+                path: relative(root, path),
+                text: read_text(path)?,
+            })
+        })
+        .collect()
+}
+
+/// Compares what the code does with what the privacy policy says.
+fn scan_ledger(root: &Path, files: &[PathBuf]) -> Vec<Finding> {
+    shipcheck_ledger::analyze(&ledger_sources(root, files)).findings
+}
+
+/// Builds the disclosure ledger of the project at `root`.
+#[must_use]
+pub fn ledger(root: &Path) -> shipcheck_ledger::Analysis {
+    let files = collect_files(root);
+    shipcheck_ledger::analyze(&ledger_sources(root, &files))
 }
 fn line_number(index: usize) -> u32 {
     u32::try_from(index + 1).unwrap_or(u32::MAX)
