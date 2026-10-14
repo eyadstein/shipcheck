@@ -1532,6 +1532,7 @@ dependencies = [
  "ignore",
  "regex",
  "serde",
+ "serde_json",
  "serde_yaml",
  "shipcheck-core",
  "shipcheck-design",

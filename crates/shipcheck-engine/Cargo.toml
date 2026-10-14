@@ -9,6 +9,7 @@ license.workspace = true
 ignore = "0.4"
 regex = "1"
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 serde_yaml = "0.9"
 shipcheck-core = { path = "../shipcheck-core" }
 shipcheck-design = { path = "../shipcheck-design" }

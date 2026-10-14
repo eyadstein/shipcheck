@@ -38,7 +38,7 @@
   extensions: [py]
   match:
     kind: line_regex
-    pattern: 'os\.system\(|subprocess\.\w+\(.*shell\s*=\s*True'
+    pattern: 'os\.system\s*\(|subprocess\.\w+\s*\(.*shell\s*=\s*True'
   examples:
     flag:
       - 'os.system("rm " + name)'

@@ -88,8 +88,8 @@
   extensions: [html, jsx, tsx]
   match:
     kind: requires_pattern
-    when: '(?i)<input[^>]*type=[\x27"]?email'
-    expect: '(?i)type=[\x27"]?checkbox|consent|privacy'
+    when: '(?i)<input[^>]*type\s*=\s*[\x27"]?email'
+    expect: '(?i)type\s*=\s*[\x27"]?checkbox|consent|privacy'
   examples:
     flag:
       - '<input type="email" name="email">'
@@ -104,7 +104,7 @@
   extensions: [html, jsx, tsx, md]
   match:
     kind: line_regex
-    pattern: '(?i)(guaranteed results|100% secure|unhackable|#1 rated|best in the world|risk[- ]free|clinically proven)'
+    pattern: '(?i)(guaranteed\s+results|100%\s+secure|unhackable|#1\s+rated|best\s+in\s+the\s+world|risk[-\s]free|clinically\s+proven)'
   examples:
     flag:
       - '<p>100% secure and risk-free.</p>'
@@ -120,7 +120,7 @@
   extensions: [html, jsx, tsx, js]
   match:
     kind: line_regex
-    pattern: '(?i)only \d+ (left|remaining|spots)|offer ends in|countdown-timer'
+    pattern: '(?i)only\s+\d+\s+(left|remaining|spots)|offer\s+ends\s+in|countdown-timer'
   examples:
     flag:
       - '<span>Only 3 left in stock!</span>'
@@ -136,7 +136,7 @@
   extensions: [html, jsx, tsx]
   match:
     kind: line_regex
-    pattern: '(?i)<input[^>]*type=[\x27"]?checkbox[^>]*\bchecked\b'
+    pattern: '(?i)<input[^>]*type\s*=\s*[\x27"]?checkbox[^>]*\bchecked\b'
   examples:
     flag:
       - '<input type="checkbox" name="marketing" checked>'
