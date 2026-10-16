@@ -152,9 +152,9 @@ fn headline_badge(file: &SourceFile) -> Option<Finding> {
         .then(|| catalog::BADGE_ABOVE_HEADLINE.finding(&file.path, number(heading)))
 }
 
-static SHADCN_BACKGROUND: Pattern =
+pub(crate) static SHADCN_BACKGROUND: Pattern =
     LazyLock::new(|| re(r"(?i)--background\s*:\s*(?:0\s+0%\s+100%|oklch\(\s*1\s+0\s+0\s*\))"));
-static SHADCN_PRIMARY: Pattern = LazyLock::new(|| {
+pub(crate) static SHADCN_PRIMARY: Pattern = LazyLock::new(|| {
     re(
         r"(?i)--primary\s*:\s*(?:222\.2\s+47\.4%\s+11\.2%|0\s+0%\s+9%|240\s+5\.9%\s+10%|oklch\(\s*0\.205\s+0\s+0\s*\))",
     )

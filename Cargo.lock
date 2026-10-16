@@ -1505,6 +1505,7 @@ dependencies = [
  "clap",
  "serde_json",
  "shipcheck-core",
+ "shipcheck-design",
  "shipcheck-engine",
  "shipcheck-ledger",
 ]
@@ -1522,6 +1523,7 @@ name = "shipcheck-design"
 version = "0.1.0"
 dependencies = [
  "regex",
+ "serde",
  "shipcheck-core",
 ]
 

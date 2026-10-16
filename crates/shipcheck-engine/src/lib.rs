@@ -16,5 +16,5 @@ pub use error::{Error, Result};
 pub use gym::{grade_rules, overall_robustness, render_gym, Mutation, RuleGrade, Slip, SlipKind};
 pub use review::{review, Review};
 pub use rule::{Catalog, Compiled, Examples, Matcher, Rule};
-pub use scanner::{ledger, scan};
+pub use scanner::{ledger, originality, scan};
 pub use walk::collect_files;

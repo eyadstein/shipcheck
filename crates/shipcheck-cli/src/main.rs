@@ -35,6 +35,9 @@ struct Cli {
     /// Print the disclosure ledger (third parties, cookies, personal data) instead of scanning
     #[arg(long)]
     ledger: bool,
+    /// Print the originality index (how much of the design is framework defaults) instead of scanning
+    #[arg(long)]
+    originality: bool,
     /// Attack every rule with rewritten versions of its own examples and grade the result
     #[arg(long)]
     gym: bool,
@@ -50,6 +53,10 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     if cli.ledger {
         print_ledger(&cli.path, cli.format);
+        return ExitCode::SUCCESS;
+    }
+    if cli.originality {
+        print_originality(&cli.path, cli.format);
         return ExitCode::SUCCESS;
     }
     let catalog = match Catalog::load(&cli.rules) {
@@ -170,6 +177,19 @@ fn print_ledger(path: &Path, format: Format) {
         Format::Json => println!(
             "{}",
             serde_json::to_string_pretty(&analysis.ledger).expect("ledger serializes to JSON")
+        ),
+    }
+}
+
+fn print_originality(path: &Path, format: Format) {
+    match (shipcheck_engine::originality(path), format) {
+        (None, _) => {
+            println!("Not enough colors, fonts or theme tokens were found to judge the design.");
+        }
+        (Some(index), Format::Text) => println!("{}", shipcheck_design::render_originality(&index)),
+        (Some(index), Format::Json) => println!(
+            "{}",
+            serde_json::to_string_pretty(&index).expect("index serializes to JSON")
         ),
     }
 }

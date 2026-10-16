@@ -13,6 +13,7 @@ path = "src/main.rs"
 clap = { version = "4", features = ["derive"] }
 serde_json = "1"
 shipcheck-core = { path = "../shipcheck-core" }
+shipcheck-design = { path = "../shipcheck-design" }
 shipcheck-engine = { path = "../shipcheck-engine" }
 shipcheck-ledger = { path = "../shipcheck-ledger" }
 

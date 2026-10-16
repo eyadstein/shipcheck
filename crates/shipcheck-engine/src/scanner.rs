@@ -141,6 +141,27 @@ pub fn ledger(root: &Path) -> shipcheck_ledger::Analysis {
     let files = collect_files(root);
     shipcheck_ledger::analyze(&ledger_sources(root, &files))
 }
+/// Reads the stylesheets and page files the design analysis cares about.
+fn design_sources(root: &Path, files: &[PathBuf]) -> Vec<shipcheck_design::SourceFile> {
+    files
+        .iter()
+        .filter(|path| shipcheck_design::is_design_file(path.as_path()))
+        .filter(|path| !is_generated(root, path.as_path()))
+        .filter_map(|path| {
+            Some(shipcheck_design::SourceFile {
+                path: relative(root, path),
+                text: read_text(path)?,
+            })
+        })
+        .collect()
+}
+
+/// Measures how much of the design of the project at `root` is framework defaults.
+#[must_use]
+pub fn originality(root: &Path) -> Option<shipcheck_design::Originality> {
+    let files = collect_files(root);
+    shipcheck_design::originality(&design_sources(root, &files))
+}
 fn line_number(index: usize) -> u32 {
     u32::try_from(index + 1).unwrap_or(u32::MAX)
 }

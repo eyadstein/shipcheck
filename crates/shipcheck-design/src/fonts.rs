@@ -81,7 +81,7 @@ fn collect(file: &SourceFile, places: &mut Places) {
 }
 
 /// Lowercases a typeface name and returns an empty string for generic or dynamic values.
-fn normalize(name: &str) -> String {
+pub(crate) fn normalize(name: &str) -> String {
     let spaced = name.replace(['+', '_'], " ").replace("%20", " ");
     let cleaned = spaced
         .trim()

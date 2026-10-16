@@ -7,11 +7,14 @@ mod checks;
 mod color;
 mod fonts;
 mod lines;
+mod originality;
 mod project;
 
 use std::path::Path;
 
 use shipcheck_core::Finding;
+
+pub use originality::{originality, render_originality, Dimension, Originality};
 
 /// File extensions the design analyzer reads.
 pub const EXTENSIONS: &[&str] = &[
@@ -44,5 +47,6 @@ pub fn is_design_file(path: &Path) -> bool {
 pub fn analyze(files: &[SourceFile]) -> Vec<Finding> {
     let mut findings = checks::per_file(files);
     findings.extend(project::project_wide(files));
+    findings.extend(originality::finding(files));
     findings
 }
