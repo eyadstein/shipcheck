@@ -36,3 +36,45 @@ cd web && npm install && npm run dev
 
 
 More detail lives in `docs/`: rules, taint analysis, design analysis and the API.
+
+## Originality index
+
+Shipcheck measures how much of a project's design is customized rather than left at common framework defaults. The originality index ranges from 0 to 100.
+
+Run the index against your project:
+
+```bash
+cargo run -p shipcheck-cli -- . --originality
+```
+
+Output the result as JSON:
+
+```bash
+cargo run -p shipcheck-cli -- . --originality --format json
+```
+
+### What is measured?
+
+| Component | Weight | What it checks |
+|---|---:|---|
+| Color palette | 50 | Common Tailwind, Bootstrap, and Material default colors |
+| Typography | 30 | Frequently used typefaces such as Inter, Roboto, and Poppins |
+| Framework tokens | 20 | Default shadcn/ui theme variables |
+
+The weights are distributed across the components that can be evaluated. Components with insufficient data are excluded from the calculation.
+
+### Improving originality
+
+- Customize framework-default colors and build a consistent brand palette.
+- Choose typography that fits your product rather than relying on common defaults.
+- Customize shadcn/ui theme tokens instead of leaving every value unchanged.
+
+### Originality finding
+
+`DES-301` is a low-severity finding reported when the palette can be evaluated and the originality index is below 40.
+
+### Limitations
+
+The index measures customization, not visual quality. A design using framework defaults can still look excellent. Some colors stored in images, unreadable theme objects, or certain CSS variable formats may not be detected.
+
+See [docs/originality.md](docs/originality.md) for the full methodology.
